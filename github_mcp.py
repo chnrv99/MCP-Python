@@ -5,6 +5,7 @@ import requests
 from typing import List
 from fastmcp import FastMCP
 from dotenv import load_dotenv
+from fastmcp.prompts.prompt import Message, PromptMessage, TextContent
 
 
 load_dotenv()
@@ -61,6 +62,21 @@ def list_issues(org: str = None) -> List[str]:
         return [issue['title'] for issue in issues if 'title' in issue]
     else:
         raise Exception(f"Failed to fetch issues: {response.status_code} {response.text}")
+    
+@mcp.resource("resource://greeting")
+def get_config() -> dict:
+    """Provides application configuration as JSON."""
+    return {
+        "theme": "dark",
+        "version": "1.2.0",
+        "features": ["tools", "resources"],
+    }
+
+@mcp.prompt
+def generate_code_request(language: str, task_description: str) -> PromptMessage:
+    """Generates a user message requesting code generation."""
+    content = f"Write a {language} function that performs the following task: {task_description}" 
+    return PromptMessage(role="user", content=TextContent(type="text", text=content))
 
 
 
